@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, ReactNode } from "react";
-import { product } from "../libs/product"; // Data produk tetap
 
 // --- Pattern Background ---
 const PatternBackground: React.FC<{ children: ReactNode; className?: string; id?: string }> = ({
@@ -145,7 +144,7 @@ const Navbar: React.FC = () => {
   );
 };
 
-// --- Komponen FAQ ---
+// --- FAQ Section ---
 const FAQSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -180,7 +179,7 @@ const FAQSection: React.FC = () => {
   );
 };
 
-// --- Komponen Testimoni ---
+// --- Testimonial Section ---
 const TestimonialSection: React.FC = () => {
   const testimonials = Array.from({ length: 9 }).map((_, i) => ({
     name: `User ${i + 1}`,
@@ -215,7 +214,7 @@ const TestimonialSection: React.FC = () => {
   );
 };
 
-// --- Komponen Quote Owner ---
+// --- Quote Owner ---
 const QuoteOwner: React.FC = () => (
   <section className="w-full py-20 md:py-32">
     <div className="max-w-2xl mx-auto">
@@ -252,29 +251,32 @@ const CTASection: React.FC = () => (
   </section>
 );
 
-// --- Komponen Utama Checkout ---
+// --- Checkout Component ---
 const Checkout: React.FC = () => {
   const config = {
-    appName: "SaaSify",
     hero: {
       title: "Streamline Your Workflow, Elevate Your Success",
       desc: "Kelola bisnis Anda lebih mudah dengan otomatisasi pintar dan integrasi modern.",
       buttonText: "Get Started Now",
       youtubeEmbed: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     },
-    pricing: {
-      title: product.name,
-      price: `Rp ${product.price}`,
-      features: [
-        "Smart Automation",
-        "Advanced Analytics",
-        "Team Collaboration",
-        "Enterprise Security",
-        "Seamless Integration",
-        "24/7 Support",
-      ],
-      buttonText: "Checkout Sekarang",
-    },
+    features: [
+      {
+        title: "Smart Automation",
+        description: "Otomatisasi tugas berulang agar lebih efisien.",
+        image: "https://images.unsplash.com/photo-1589224535384-033b9cfa6c88?q=80&w=800",
+      },
+      {
+        title: "Advanced Analytics",
+        description: "Insight dengan visualisasi data real-time.",
+        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800",
+      },
+      {
+        title: "Team Collaboration",
+        description: "Kolaborasi tim lebih mudah dan produktif.",
+        image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800",
+      },
+    ],
     howItWorks: {
       title: "How It Works",
       steps: [
@@ -285,51 +287,16 @@ const Checkout: React.FC = () => {
     },
   };
 
-  const features = [
-    {
-      title: "Smart Automation",
-      description: "Otomatisasi tugas berulang agar lebih efisien.",
-      image: "https://images.unsplash.com/photo-1589224535384-033b9cfa6c88?q=80&w=800",
-    },
-    {
-      title: "Advanced Analytics",
-      description: "Insight dengan visualisasi data real-time.",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800",
-    },
-    {
-      title: "Team Collaboration",
-      description: "Kolaborasi tim lebih mudah dan produktif.",
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800",
-    },
-  ];
-
   const scrollToPricing = () => {
     const pricingSection = document.getElementById("pricing-section");
     if (pricingSection) pricingSection.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const checkout = async () => {
-    const data = { id: product.id, productName: product.name, price: product.price, quantity: 1 };
-    try {
-      const res = await fetch("/api/tokenizer", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const resData = await res.json();
-      if (!resData?.token) throw new Error("Invalid token response");
-      (window as any).snap.pay(resData.token);
-    } catch (err: any) {
-      console.error("Checkout error:", err.message);
-    }
   };
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-black">
       <Navbar />
 
-      {/* Hero (Section 1 with Pattern) */}
+      {/* Hero Section */}
       <PatternBackground className="w-full py-20 md:py-32 lg:py-40">
         <div className="container mx-auto px-4 md:px-6 text-center max-w-3xl">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
@@ -356,14 +323,14 @@ const Checkout: React.FC = () => {
         </div>
       </PatternBackground>
 
-      {/* Features (Section 2 normal) */}
+      {/* Features Section */}
       <section id="features" className="w-full py-20 md:py-32 bg-white">
         <div className="container mx-auto px-4 md:px-6">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-12">
             Everything You Need
           </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, i) => (
+            {config.features.map((feature, i) => (
               <Card key={i} className="h-full hover:shadow-xl transition">
                 <div className="relative h-48 overflow-hidden rounded-t-2xl">
                   <img src={feature.image} alt={feature.title} className="w-full h-full object-cover" />
@@ -378,7 +345,7 @@ const Checkout: React.FC = () => {
         </div>
       </section>
 
-      {/* How It Works (Section 3 with Pattern) */}
+      {/* How It Works */}
       <PatternBackground className="w-full py-20 md:py-32">
         <div className="container mx-auto px-4 md:px-6">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-12">
@@ -397,58 +364,107 @@ const Checkout: React.FC = () => {
         </div>
       </PatternBackground>
 
-      {/* Testimonials (Section 4 normal) */}
+      {/* Testimonials */}
       <TestimonialSection />
 
-      {/* Pricing (Section 5 with Pattern) */}
+      {/* Pricing Section */}
       <PatternBackground className="w-full py-20 md:py-32 bg-gray-50" id="pricing-section">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-md mx-auto">
-            <Card className="bg-white shadow-2xl rounded-3xl p-6">
-              <CardHeader className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900">{config.pricing.title}</h2>
-                <p className="text-4xl font-extrabold text-blue-600 mt-2">{config.pricing.price}</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-gray-700">
-                  {config.pricing.features.map((feature, i) => (
-                    <li key={i} className="flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2 text-blue-600 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg"
-                  onClick={checkout}
-                >
-                  {config.pricing.buttonText}
-                </Button>
-              </CardFooter>
-            </Card>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Pilih Paket Anda
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-3">
+            {[
+              {
+                id: 1,
+                name: "Basic Plan",
+                price: "Rp 150.000",
+                features: ["Smart Automation", "Team Collaboration", "24/7 Support"],
+              },
+              {
+                id: 2,
+                name: "Pro Plan",
+                price: "Rp 300.000",
+                features: [
+                  "Smart Automation",
+                  "Advanced Analytics",
+                  "Team Collaboration",
+                  "24/7 Support",
+                ],
+              },
+              {
+                id: 3,
+                name: "Enterprise Plan",
+                price: "Rp 600.000",
+                features: [
+                  "Smart Automation",
+                  "Advanced Analytics",
+                  "Team Collaboration",
+                  "Enterprise Security",
+                  "Seamless Integration",
+                  "24/7 Support",
+                ],
+              },
+            ].map((prod) => (
+              <Card key={prod.id} className="bg-white shadow-2xl rounded-3xl p-6 hover:shadow-xl transition">
+                <CardHeader className="text-center">
+                  <h3 className="text-2xl font-bold text-gray-900">{prod.name}</h3>
+                  <p className="text-4xl font-extrabold text-blue-600 mt-2">{prod.price}</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3 text-gray-700">
+                    {prod.features.map((feature, i) => (
+                      <li key={i} className="flex items-center">
+                        <svg
+                          className="w-5 h-5 mr-2 text-blue-600 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch("/api/tokenizer", {
+                          method: "POST",
+                          body: JSON.stringify({
+                            id: prod.id,
+                            productName: prod.name,
+                            price: prod.price.replace(/[Rp\s.]/g, ""),
+                            quantity: 1,
+                          }),
+                          headers: { "Content-Type": "application/json" },
+                        });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const data = await res.json();
+                        if (!data?.token) throw new Error("Invalid token");
+                        (window as any).snap.pay(data.token);
+                      } catch (err: any) {
+                        console.error("Checkout error:", err.message);
+                      }
+                    }}
+                  >
+                    Checkout Sekarang
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
           </div>
         </div>
       </PatternBackground>
 
-      {/* Quote Owner (Section 6 normal) */}
+      {/* Quote Owner */}
       <QuoteOwner />
 
-      {/* FAQ (Section 7 with Pattern) */}
+      {/* FAQ Section */}
       <FAQSection />
 
-      {/* CTA (Section 8 normal) */}
-      <CTASection />
-    </div>
-  );
-};
-
-export default Checkout;
+      {/* CTA
