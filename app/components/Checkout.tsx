@@ -1,7 +1,61 @@
 "use client";
 
 import React, { useState, ReactNode } from "react";
-import { product } from "../libs/product"; // Data produk tetap
+
+// --- Data Produk ---
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  features: string[];
+  popular?: boolean;
+}
+
+const products: Product[] = [
+  {
+    id: "basic-plan",
+    name: "Basic Plan",
+    price: 199000,
+    features: [
+      "Smart Automation Basic",
+      "Basic Analytics",
+      "Team Collaboration (max 5 users)",
+      "Standard Security",
+      "Email Support",
+    ]
+  },
+  {
+    id: "pro-plan",
+    name: "Pro Plan",
+    price: 499000,
+    features: [
+      "Smart Automation Pro",
+      "Advanced Analytics",
+      "Team Collaboration (max 20 users)",
+      "Enhanced Security",
+      "Priority Support",
+      "API Access",
+      "Custom Integration",
+    ],
+    popular: true
+  },
+  {
+    id: "enterprise-plan",
+    name: "Enterprise Plan",
+    price: 999000,
+    features: [
+      "Smart Automation Enterprise",
+      "Advanced Analytics + AI Insights",
+      "Unlimited Team Collaboration",
+      "Enterprise Security",
+      "24/7 Dedicated Support",
+      "Full API Access",
+      "Custom Integration",
+      "Onboarding Session",
+      "Custom Reporting",
+    ]
+  }
+];
 
 // --- Pattern Background ---
 const PatternBackground: React.FC<{ children: ReactNode; className?: string; id?: string }> = ({
@@ -151,7 +205,7 @@ const FAQSection: React.FC = () => {
 
   const faqs = [
     { q: "Apa itu layanan ini?", a: "Ini adalah platform untuk membantu bisnis berkembang lebih cepat." },
-    { q: "Bagaimana cara berlangganan?", a: "Pilih paket lalu klik “Checkout Sekarang”. Pembayaran lewat gateway." },
+    { q: "Bagaimana cara berlangganan?", a: "Pilih paket lalu klik \"Checkout Sekarang\". Pembayaran lewat gateway." },
     { q: "Apakah bisa upgrade paket?", a: "Ya, bisa upgrade kapan saja dengan membayar selisih harga paket." },
   ];
 
@@ -226,7 +280,7 @@ const QuoteOwner: React.FC = () => (
           className="w-20 h-20 rounded-full mx-auto mb-4 border-2 border-blue-600 object-cover"
         />
         <blockquote className="text-lg italic text-gray-700 mb-4">
-          “Kami percaya teknologi dapat membantu setiap bisnis tumbuh lebih cepat dan lebih cerdas.”
+          "Kami percaya teknologi dapat membantu setiap bisnis tumbuh lebih cepat dan lebih cerdas."
         </blockquote>
         <p className="font-semibold text-gray-900">John Doe</p>
         <p className="text-sm text-gray-500">Founder & CEO, SaaSify</p>
@@ -262,19 +316,6 @@ const Checkout: React.FC = () => {
       buttonText: "Get Started Now",
       youtubeEmbed: "https://www.youtube.com/embed/dQw4w9WgXcQ",
     },
-    pricing: {
-      title: product.name,
-      price: `Rp ${product.price}`,
-      features: [
-        "Smart Automation",
-        "Advanced Analytics",
-        "Team Collaboration",
-        "Enterprise Security",
-        "Seamless Integration",
-        "24/7 Support",
-      ],
-      buttonText: "Checkout Sekarang",
-    },
     howItWorks: {
       title: "How It Works",
       steps: [
@@ -308,21 +349,56 @@ const Checkout: React.FC = () => {
     if (pricingSection) pricingSection.scrollIntoView({ behavior: "smooth" });
   };
 
-  const checkout = async () => {
-    const data = { id: product.id, productName: product.name, price: product.price, quantity: 1 };
+  const checkout = async (product: Product) => {
+    const data = { 
+      id: `${product.id}-${Date.now()}`,
+      productName: product.name, 
+      price: product.price, 
+      quantity: 1 
+    };
+    
     try {
       const res = await fetch("/api/tokenizer", {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "Content-Type": "application/json" },
       });
+      
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const resData = await res.json();
+      
       if (!resData?.token) throw new Error("Invalid token response");
-      (window as any).snap.pay(resData.token);
+      
+      // Midtrans Snap payment
+      (window as any).snap.pay(resData.token, {
+        onSuccess: function(result: any) {
+          console.log('Payment success:', result);
+          alert('Payment berhasil! Terima kasih telah berlangganan.');
+        },
+        onPending: function(result: any) {
+          console.log('Payment pending:', result);
+          alert('Payment pending: ' + result.status_message);
+        },
+        onError: function(result: any) {
+          console.log('Payment error:', result);
+          alert('Payment error: ' + result.status_message);
+        },
+        onClose: function() {
+          console.log('Payment popup closed');
+        }
+      });
     } catch (err: any) {
       console.error("Checkout error:", err.message);
+      alert('Terjadi error saat proses checkout. Silakan coba lagi.');
     }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
@@ -337,7 +413,6 @@ const Checkout: React.FC = () => {
           </h1>
           <p className="text-lg text-gray-600 mb-6">{config.hero.desc}</p>
           <Button
-            size="lg"
             className="rounded-full h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 text-white mb-8"
             onClick={scrollToPricing}
           >
@@ -400,41 +475,86 @@ const Checkout: React.FC = () => {
       {/* Testimonials (Section 4 normal) */}
       <TestimonialSection />
 
-      {/* Pricing (Section 5 with Pattern) */}
+      {/* Pricing (Section 5 with Pattern) - 3 CARD PRICING */}
       <PatternBackground className="w-full py-20 md:py-32 bg-gray-50" id="pricing-section">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="max-w-md mx-auto">
-            <Card className="bg-white shadow-2xl rounded-3xl p-6">
-              <CardHeader className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900">{config.pricing.title}</h2>
-                <p className="text-4xl font-extrabold text-blue-600 mt-2">{config.pricing.price}</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-gray-700">
-                  {config.pricing.features.map((feature, i) => (
-                    <li key={i} className="flex items-center">
-                      <svg
-                        className="w-5 h-5 mr-2 text-blue-600 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition shadow-lg"
-                  onClick={checkout}
-                >
-                  {config.pricing.buttonText}
-                </Button>
-              </CardFooter>
-            </Card>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-center mb-4">
+            Pilih Paket yang Tepat untuk Bisnis Anda
+          </h2>
+          <p className="text-lg text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+            Mulai dari kebutuhan dasar hingga solusi enterprise yang lengkap
+          </p>
+          <div className="grid gap-8 sm:grid-cols-1 lg:grid-cols-3 max-w-6xl mx-auto">
+            {products.map((product) => (
+              <Card 
+                key={product.id} 
+                className={`bg-white shadow-2xl rounded-3xl p-6 relative transition-all hover:scale-105 h-full flex flex-col ${
+                  product.popular ? 'ring-2 ring-blue-500 transform scale-105 border-blue-500' : 'border border-gray-200'
+                }`}
+              >
+                {product.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                      PALING POPULAR
+                    </span>
+                  </div>
+                )}
+                
+                <CardHeader className="text-center pb-4">
+                  <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
+                  <div className="mt-4">
+                    <p className="text-4xl font-extrabold text-blue-600">
+                      {formatPrice(product.price)}
+                    </p>
+                    <p className="text-gray-500 text-sm mt-2">/bulan</p>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="flex-grow">
+                  <ul className="space-y-4 text-gray-700">
+                    {product.features.map((feature, i) => (
+                      <li key={i} className="flex items-start">
+                        <svg
+                          className="w-5 h-5 mr-3 text-blue-600 flex-shrink-0 mt-0.5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                
+                <CardFooter className="pt-4">
+                  <Button
+                    className={`w-full py-4 rounded-xl font-semibold transition-all shadow-lg ${
+                      product.popular 
+                        ? 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-xl' 
+                        : 'bg-gray-900 text-white hover:bg-gray-800 hover:shadow-xl'
+                    }`}
+                    onClick={() => checkout(product)}
+                  >
+                    Pilih {product.name}
+                  </Button>
+                  <p className="text-xs text-gray-500 text-center mt-3">
+                    Tidak ada biaya tersembunyi
+                  </p>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          
+          {/* Additional Info */}
+          <div className="text-center mt-12">
+            <p className="text-gray-600">
+              ❯ Semua paket termasuk update gratis dan support 24/7
+            </p>
+            <p className="text-gray-600 mt-2">
+              ❯ Garansi uang kembali 30 hari jika tidak puas
+            </p>
           </div>
         </div>
       </PatternBackground>
