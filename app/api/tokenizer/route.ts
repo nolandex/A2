@@ -1,4 +1,3 @@
-// app/api/tokenizer/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import Midtrans, { Snap } from 'midtrans-client';
 
@@ -13,13 +12,13 @@ export async function POST(request: NextRequest) {
     const { id, productName, price, quantity } = await request.json();
 
     const parameter: Midtrans.TransactionRequestBody = {
-      item_details: {
+      item_details: [{
         name: productName,
         price: price,
         quantity: quantity,
-      },
+      }],
       transaction_details: {
-        order_id: `${id}-${Date.now()}`, // Tambah timestamp untuk uniqueness
+        order_id: id,
         gross_amount: price * quantity,
       },
       customer_details: {
