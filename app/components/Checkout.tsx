@@ -369,24 +369,9 @@ const Checkout: React.FC = () => {
       
       if (!resData?.token) throw new Error("Invalid token response");
       
-      // Midtrans Snap payment
-      (window as any).snap.pay(resData.token, {
-        onSuccess: function(result: any) {
-          console.log('Payment success:', result);
-          alert('Payment berhasil! Terima kasih telah berlangganan.');
-        },
-        onPending: function(result: any) {
-          console.log('Payment pending:', result);
-          alert('Payment pending: ' + result.status_message);
-        },
-        onError: function(result: any) {
-          console.log('Payment error:', result);
-          alert('Payment error: ' + result.status_message);
-        },
-        onClose: function() {
-          console.log('Payment popup closed');
-        }
-      });
+      // Midtrans Snap payment - tanpa callback handlers
+      (window as any).snap.pay(resData.token);
+      
     } catch (err: any) {
       console.error("Checkout error:", err.message);
       alert('Terjadi error saat proses checkout. Silakan coba lagi.');
